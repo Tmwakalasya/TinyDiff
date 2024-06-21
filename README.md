@@ -14,9 +14,6 @@ Clone this repository:
 git clone https://github.com/Tmwakalasya/TinyDiff.git
 cd TinyDiff
 
-
-
-
 ## Project Structure
 
 tinydiff.py: Core implementation of the Value class and operations
@@ -33,10 +30,7 @@ Create visualization function for computational graphs
 Write unit tests
 Add examples demonstrating usage in simple neural networks
 
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
 Acknowledgments
-
 Inspired by Andrej Karpathy's micrograd
 
 
