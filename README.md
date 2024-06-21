@@ -6,8 +6,7 @@ TinyDiff is a lightweight automatic differentiation library inspired by microgra
 
 - Scalar-valued autograd engine
 - Basic arithmetic operations (addition, subtraction, multiplication, division, exponentiation)
-- Computational graph visualization using graphviz
-- Simple and readable implementation for educational purposes
+- readable implementation for educational purposes
 
 ## Installation
 
