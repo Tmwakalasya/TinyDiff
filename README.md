@@ -12,6 +12,8 @@ TinyDiff is a lightweight automatic differentiation library inspired by microgra
 ## Installation
 
 Clone this repository:
+git clone https://github.com/Tmwakalasya/TinyDiff.git
+cd TinyDiff
 
 
 
