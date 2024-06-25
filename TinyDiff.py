@@ -48,8 +48,8 @@ class Value:
         exponent = Value(self.data ** power.data, (self, power), "**")
 
         def _backward():
-            self.gradient += (power.data * self.data ** (power.data - 1)) * output.gradient
-            power.gradient += (self.data ** power.data * math.log(self.data)) * output.gradient
+            self.gradient += (power.data * self.data ** (power.data - 1)) * exponent.gradient
+            power.gradient += (self.data ** power.data * math.log(self.data)) * exponent.gradient
 
         return exponent
 
