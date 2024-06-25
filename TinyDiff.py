@@ -18,8 +18,8 @@ class Value:
         output = Value(self.data + other.data, (self, other), "+")
 
         def _backward():
-            self.gradient += 1.0 * other.gradient
-            other.gradient += 1.0 * other.gradient
+            self.gradient += 1.0 * output.gradient
+            other.gradient += 1.0 * output.gradient
 
         output._backward = _backward
         return output
@@ -29,7 +29,7 @@ class Value:
 
         def _backward():
             self.gradient += other.data * output.gradient
-            other.gradient = self.data * output.gradient
+            other.gradient += self.data * output.gradient
 
         output._backward = _backward
         return output
@@ -38,8 +38,8 @@ class Value:
         output = Value(self.data - other.data, (self, other), operation="-")
 
         def _backward():
-            self.gradient += 1.0 * other.gradient
-            other.gradient += -1.0 * other.gradient
+            self.gradient += 1.0 * output.gradient
+            other.gradient += -1.0 * output.gradient
 
         output._backward = _backward
         return output
@@ -51,12 +51,19 @@ class Value:
             self.gradient += (power.data * self.data ** (power.data - 1)) * exponent.gradient
             power.gradient += (self.data ** power.data * math.log(self.data)) * exponent.gradient
 
+        exponent._backward = _backward
         return exponent
 
     def __truediv__(self, other):
         if other.data == 0:
             raise ValueError("Division by Zero")
         output = Value(self.data / other.data, (self, other), "/")
+
+        def _backward():
+            self.gradient += (1 / other.data) * output.gradient
+            other.gradient += (-self.data / (other.data ** 2)) * output.gradient
+
+        output._backward = _backward
         return output
 
     def tanh(self):
@@ -66,6 +73,8 @@ class Value:
 
         def _backward():
             self.gradient += (1 - t ** 2) * output.gradient
+
+        output._backward = _backward
         return output
 
     def sigmoid(self):
@@ -81,24 +90,29 @@ class Value:
             z = math.exp(x)
             s = z / (1 + z)
         output = Value(s, (self,), 'sigmoid')
+
+        def _backward():
+            self.gradient += s * (1 - s) * output.gradient
+
+        output._backward = _backward
         return output
 
-        def backward(self):
-            topo = []
-            visited = set()
+    def backward(self):
+        topo = []
+        visited = set()
 
-            def build_topo(v):
-                if v not in visited:
-                    visited.add(v)
-                    for child in v.previous_vals:
-                        build_topo(child)
-                    topo.append(v)
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v.previous_vals:
+                    build_topo(child)
+                topo.append(v)
 
-            build_topo(self)
+        build_topo(self)
 
-            self.gradient = 1.0
-            for node in reversed(topo):
-                node._backward()
+        self.gradient = 1.0
+        for node in reversed(topo):
+            node._backward()
 
 
 # inputs x1,x2
