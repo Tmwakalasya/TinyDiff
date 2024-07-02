@@ -8,6 +8,7 @@ class Value:
         self.operation = operation
         self.label = label
         self.gradient = 0.0
+        self._backward = lambda: None
 
     def __repr__(self):
         """This provides a small string representation"""
@@ -15,6 +16,7 @@ class Value:
         return output
 
     def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         output = Value(self.data + other.data, (self, other), "+")
 
         def _backward():
@@ -25,6 +27,7 @@ class Value:
         return output
 
     def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         output = Value(self.data * other.data, (self, other), "*")
 
         def _backward():
@@ -33,6 +36,10 @@ class Value:
 
         output._backward = _backward
         return output
+
+    def __rmul__(self, other):
+        # Use if __mul__ won't work:
+        return self * other
 
     def __sub__(self, other):
         output = Value(self.data - other.data, (self, other), operation="-")
@@ -45,11 +52,11 @@ class Value:
         return output
 
     def __pow__(self, power, modulo=None):
-        exponent = Value(self.data ** power.data, (self, power), "**")
+        assert isinstance(power, (int, float)), "Power must be int or float"
+        exponent = Value(self.data ** power, (self,), "**")
 
         def _backward():
-            self.gradient += (power.data * self.data ** (power.data - 1)) * exponent.gradient
-            power.gradient += (self.data ** power.data * math.log(self.data)) * exponent.gradient
+            self.gradient += (power * self.data ** (power - 1)) * exponent.gradient
 
         exponent._backward = _backward
         return exponent
@@ -97,6 +104,15 @@ class Value:
         output._backward = _backward
         return output
 
+    def relu(self):
+        output = Value(max(0, self.data), (self,), "relu")
+
+        def _backward():
+            self.gradient += (self.data > 0) * output.gradient
+
+        output._backward = _backward
+        return output
+
     def backward(self):
         topo = []
         visited = set()
@@ -109,6 +125,7 @@ class Value:
                 topo.append(v)
 
         build_topo(self)
+        print(topo)
 
         self.gradient = 1.0
         for node in reversed(topo):
@@ -128,11 +145,25 @@ x1w1 = x1 * w1
 x1w1.label = 'x1*w1'
 x2w2 = x2 * w2
 x2w2.label = 'x2*w2'
-x1w1x2w2 = x1w1 + x2w2;
+x1w1x2w2 = x1w1 + x2w2
 x1w1x2w2.label = 'x1*w1 + x2*w2'
 n = x1w1x2w2 + b
 n.label = 'n'
 o = n.tanh()
 o.label = 'o'
 
-print(x1w1)
+# Compute gradients
+o.backward()
+
+# Print results
+print(f"o.gradient: {o.gradient}")
+print(f"n.gradient: {n.gradient}")
+print(f"b.gradient: {b.gradient}")
+print(f"x1w1x2w2.gradient: {x1w1x2w2.gradient}")
+print(f"x1.gradient: {x1.gradient}")
+print(f"x2.gradient: {x2.gradient}")
+print(f"w1.gradient: {w1.gradient}")
+print(f"w2.gradient: {w2.gradient}")
+A = Value(3)
+z = A + 1
+print(z)
