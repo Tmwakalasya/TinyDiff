@@ -1,6 +1,6 @@
 # TinyDiff
 
-TinyDiff is a lightweight automatic differentiation library inspired by micrograd. It provides a simple and educational implementation of reverse-mode autodiff, useful for understanding the fundamentals of neural networks and backpropagation.
+TinyDiff is a lightweight automatic differentiation library inspired by micrograd. It provides implementation of reverse-mode autodiff, useful for understanding the fundamentals of neural networks and backpropagation.
 
 ## Features
 
