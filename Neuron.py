@@ -21,10 +21,37 @@ class Neuron:
         return out
 
 
-x = [2.0, 3.0]
-n = Neuron(2)
+class Layer:
+    def __init__(self, n_inputs, n_outputs):
+        self.neurons = [Neuron(n_inputs) for _ in range(n_outputs)]
+
+    def __call__(self, x):
+        output = [n(x) for n in self.neurons]
+        return output[0] if len(output) == 1 else output
+
+
+class MLP:
+    def __init__(self, n_inputs, n_outputs):
+        size = [n_inputs] + n_outputs
+        self.layers = [Layer(size[i], size[i + 1]) for i in range(len(n_outputs))]
+
+    def __call__(self, x):
+        for layer in self.layers:
+            x = layer.__call__(x)
+        return x
+
+
+xs = [[2.0, 3.0, 4.0],
+      [3.0, 8.0, 5.0],
+      [4.0, 6.0, 7.0],
+      [7.0, 8.0, 9.0],
+      ]
+predictions = [Value(P) for P in [1.0,-1.0,-1.0,1.0]]
+x = [2.0, 3.0, -1]
+n = MLP(3, [4, 4, 1])
+ypred = [n(x) for x in xs]
+loss = [(yout - ygt) ** 2 for ygt, yout in zip(predictions,ypred)]
+print(f"Loss: {loss}")
+print(ypred)
 output = n(x)
 print(output)
-
-
-
